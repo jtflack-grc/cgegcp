@@ -1,15 +1,15 @@
-# cgegcp: CGE-GCP labs and capstone starter
+# CGE-GCP capstone: deployed GRC evidence pipeline
 
 **Tenancy assumption: one Google Cloud project on a personal @gmail.com account, with no Organization above it.** Nothing in this repo needs an Organization. If you work inside one, see the appendix: `docs/APPENDIX-ORGANIZATION.md`.
 
-This is the lab and capstone repo for **Certified GRC Engineer, GCP Specialty (CGE-GCP)** from the GRC Engineering Club Training Academy. You build a six-stage GRC engineering pipeline in your own project:
+This is the lab and capstone repo for **Certified GRC Engineer, GCP Specialty (CGE-GCP)** from the GRC Engineering Club Training Academy. This repository implements a staged GRC engineering pipeline in your own project:
 
 | Stage | Folder | What it does | Runs as |
 |---|---|---|---|
 | 0 | `stages/00-foundation` | APIs as code; six pipeline identities created with zero permissions | you |
 | 1 | `stages/01-discovery` | Measures what's running. Changes nothing. Outputs a gap map | you / CI (read-only) |
 | 2 | `stages/02-activation` | Enables only what's missing: Data Access logs, 365-day audit log bucket + sink | you |
-| 3 | `stages/03-evidence-store` | Firestore evidence store, locked reports bucket, daily collector running five checks over Cloud Asset Inventory | `grc-collector` |
+| 3 | `stages/03-evidence-store` | Firestore evidence store, locked reports bucket, daily collector running six checks (five starter + one custom) over Cloud Asset Inventory | `grc-collector` |
 | 4 | `stages/04-reporting` | POA&M, SAR and OSCAL 1.1.2 SSP from Firestore only | `grc-reporter` |
 | 5 | `stages/05-narrative` | Optional Gemini weekly digest. Describes, never decides | `grc-narrator` |
 | 6 | `stages/06-enforcement` | Fixes public buckets on a ladder: report-only → approve → auto | `grc-remediator` |
@@ -32,9 +32,11 @@ More diagrams (identities, daily loop, remediation ladder, CI gate, data model) 
 
 ## CGE-GCP capstone workspace (jtflack-grc)
 
-**Target GCP Project ID:** `cge-gcp-lab` (separate from MMC). The project name and ID have been confirmed by the project owner; cloud access, billing and deployed resources still need to be verified from the GCP account.
+**Deployed project:** `cge-gcp-lab` (separate from MMC); account, billing, tenancy and deployed resources verified in Google Cloud Shell on 2026-11-19.
 
-**Development branch:** `cge-gcp-capstone`. Changes live here until they are tested and merged to `main` for final grading. Do not submit the upstream starter without substantial original changes.
+**Default and submission branch:** `cge-gcp-capstone`. The starter `main` branch remains intact, but the public repository opens on this tested capstone branch. No merge into `main` is needed.
+
+**Live validation (2026-11-19 UTC):** Stages 00, 01, 02, 03, 04 and 06 deployed. Discovery + activation converge with `No changes`. Six detective controls yielded 15 Firestore assessments; two original high-severity findings were remediated, then a fresh collection recorded **15 passes and 0 open failures**. The locked reports bucket denied deletion (HTTP 403), the reporter identity was denied a Firestore write (HTTP 403), and the generated OSCAL SSP passed schema validation. The POA&M, SAR and SSP were generated directly from Firestore, with original and follow-up reports retained in the locked bucket. A PR policy-gate negative test rejected a basic-role grant (see [evidence/03-policy-gate-denied.md](evidence/03-policy-gate-denied.md)) and the PR was closed without merge. Independent, read-only Terraform plans of all six deployed stages reported **no drift** (see [evidence/04-manual-drift-check.md](evidence/04-manual-drift-check.md)). The nightly drift GitHub workflow is configured; a successful hosted execution is a separate outstanding operational verification. Stage 05 narrative is intentionally optional and undeployed.
 
 ### First session: shell-only bootstrap
 
@@ -70,7 +72,7 @@ gcloud auth application-default print-access-token >/dev/null 2>&1 || gcloud aut
 
 Before deployment: establish a **$25 budget** for this project with **50%, 90%, 100%** notifications. Budget alerts **do not stop spending**. Check that the project belongs to the intended personal account and is not attached to an Organization.
 
-Once the probe is green, follow `labs/02-toolkit/README.md` and `labs/03-foundation/README.md` to deploy incrementally. Stage 3 contains an **irreversible bucket retention lock** (default one-day retention); inspect the Terraform plan and retention period before applying it.
+Once the probe is green, deploy in this order: bootstrap the versioned Terraform state bucket (`labs/03-foundation/bootstrap.sh`), apply `00-foundation`, run discovery `01-discovery`, apply `02-activation`, rerun discovery and confirm activation converges, apply `03-evidence-store`, seed the control mappings and collect, apply `04-reporting` and generate reports, then apply `06-enforcement` with `mode=report_only`. Stage `05-narrative` is optional. Initialize each stage's independent GCS backend using `labs/03-foundation/backend.hcl`. The per-stage commands are in the corresponding lab guides. Stage 3 contains an **irreversible bucket retention lock** (default one-day retention); inspect the Terraform plan and retention period before applying it.
 
 **The first run is intentionally limited to validation and API enablement.** It does not apply Terraform, create a retention lock, or configure IAM federation. See `docs/CAPSTONE-PLAN.md` for the grading checklist and evidence to save.
 
