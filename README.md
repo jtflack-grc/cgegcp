@@ -36,7 +36,19 @@ More diagrams (identities, daily loop, remediation ladder, CI gate, data model) 
 
 **Development branch:** `cge-gcp-capstone`. Changes live here until they are tested and merged to `main` for final grading. Do not submit the upstream starter without substantial original changes.
 
-### First session: configure your own Cloud SDK session
+### First session: shell-only bootstrap
+
+Use **Google Cloud Shell**, then run the following commands. The script selects the confirmed project `cge-gcp-lab`, verifies billing and tenancy, creates a project-scoped $25/month alert budget if absent, and runs AJ's initial API probe. It **does not run Terraform apply or lock retention**.
+
+```bash
+git clone --branch cge-gcp-capstone https://github.com/jtflack-grc/cgegcp.git
+cd cgegcp
+bash scripts/prepare-gcp-shell.sh
+```
+
+Review the output before the first Terraform deployment. This project must remain separate from MMC.
+
+### Alternative: manual setup
 
 Run in **Google Cloud Shell** after selecting the intended personal Google account, or in a local terminal with `gcloud`, Terraform and Git available:
 
