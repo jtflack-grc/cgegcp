@@ -1,6 +1,6 @@
 # Drift: every night, plan every stage. Any change means reality and code disagree;
 # the job opens an issue with the diff. Read-only identity: drift is reported, never "fixed" here.
-name: drift
+name: drift - nightly Terraform monitoring
 on:
   schedule:
     - cron: "0 10 * * *"
