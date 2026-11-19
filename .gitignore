@@ -6,5 +6,6 @@ tfplan
 labs/03-foundation/backend.hcl
 build/
 __pycache__/
+.venv/
 validation/raw/*-tmp*
 validation/raw/
