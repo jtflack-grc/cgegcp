@@ -37,6 +37,13 @@ for d in stages/*/; do
   fi
 done
 
+echo "== Original detective control tests =="
+if command -v python3 >/dev/null 2>&1 && python3 -m unittest discover -s functions/collector -p 'test_*.py' >/dev/null 2>&1; then
+  ok "custom bucket public access prevention control passes positive/negative fixtures"
+else
+  bad "custom control fixture tests fail (run: python3 -m unittest discover -s functions/collector -p 'test_*.py' -v)"
+fi
+
 echo "== Evidence integrity =="
 grep -rqE --include='*.tf' 'is_locked *= *var\.lock_reports_bucket|is_locked *= *true' stages/03-evidence-store/ \
   && ok "reports bucket retention lock configured" || bad "no retention lock on the reports bucket"
