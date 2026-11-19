@@ -1,4 +1,4 @@
-"""The pipeline's five checks, as code.
+"""The pipeline's six checks, as code (five starter checks plus CHK-STG-03).
 
 Each check reads Cloud Asset Inventory data (already fetched by main.py) and returns
 one result per resource: status "pass" or "fail", plus the evidence the decision was
