@@ -61,3 +61,22 @@ def chk_log_01(project, audit_configs):
             types |= {lc.get("logType") for lc in c.get("auditLogConfigs", [])}
     return [_result("CHK-LOG-01", project, REQUIRED_DATA_ACCESS <= types,
                     {"storage_log_types": sorted(t for t in types if t)})]
+
+
+def chk_stg_03(buckets):
+    """Custom detective control: explicit public access prevention on every bucket.
+
+    A bucket with no public IAM grants is not necessarily protected from a
+    future accidental grant. Enforce public access prevention independently of
+    the binding scan (CHK-STG-01) and uniform access check (CHK-STG-02).
+    Missing configuration is treated as noncompliant.
+    """
+    out = []
+    for name, data in buckets.items():
+        setting = data.get("iamConfiguration", {}).get("publicAccessPrevention")
+        enforced = isinstance(setting, str) and setting.lower() == "enforced"
+        out.append(_result("CHK-STG-03", name, enforced, {
+            "publicAccessPrevention": setting,
+            "expected": "enforced",
+        }))
+    return out
