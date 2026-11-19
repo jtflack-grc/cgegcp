@@ -17,7 +17,11 @@ ACTIVE_ACCOUNT="$(gcloud auth list --filter='status:ACTIVE' --format='value(acco
 echo "Active account: $ACTIVE_ACCOUNT"
 [ -n "$ACTIVE_ACCOUNT" ] || { echo "No active gcloud identity"; exit 1; }
 
-PARENT="$(gcloud projects describe "$PROJECT" --format='value(parent.type)')"
+PARENT_JSON="$(timeout 25s gcloud projects describe "$PROJECT" --format='json(parent)')" || {
+  echo "STOP: project ancestry lookup failed or timed out."
+  exit 1
+}
+PARENT="$(printf '%s' "$PARENT_JSON" | python3 -c 'import json,sys; p=json.load(sys.stdin).get("parent") or {}; print(p.get("type", ""))')"
 if [ -n "$PARENT" ]; then
   echo "STOP: project has parent type '$PARENT'; investigate tenancy before continuing."
   exit 1
