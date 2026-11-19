@@ -18,8 +18,8 @@ export CLOUDSDK_BILLING_QUOTA_PROJECT="$P"
 # New projects do not necessarily have Resource Manager enabled. Enable APIs
 # before calling projects describe, and suppress interactive auto-enable prompts.
 echo "Enabling prerequisite APIs (first run may take a moment)..."
-if ! gcloud services enable cloudresourcemanager.googleapis.com cloudasset.googleapis.com \\
-  logging.googleapis.com storage.googleapis.com cloudbilling.googleapis.com \\
+if ! gcloud services enable cloudresourcemanager.googleapis.com cloudasset.googleapis.com \
+  logging.googleapis.com storage.googleapis.com cloudbilling.googleapis.com \
   --project="$P" --quiet; then
   bad "could not enable prerequisite APIs (check project owner and billing)"
   exit 1
@@ -37,9 +37,7 @@ parent=$(printf '%s' "$PARENT_JSON" | python3 -c 'import json,sys; p=json.load(s
 
 # Enable APIs first: with the quota project pinned, even the billing check needs
 # the Cloud Billing API on (validation: SERVICE_DISABLED otherwise).
-echo "Enabling the APIs Lab 2 uses (stage 00 enables the rest in Lab 3)..."
-gcloud services enable cloudasset.googleapis.com logging.googleapis.com storage.googleapis.com \
-  cloudresourcemanager.googleapis.com cloudbilling.googleapis.com --project="$P" >/dev/null 2>&1
+echo "Checking required APIs (Stage 0 enables the rest later)..."
 for api in cloudasset logging storage cloudresourcemanager cloudbilling; do
   gcloud services list --enabled --project="$P" --filter="config.name=$api.googleapis.com" \
     --format='value(config.name)' | grep -q . && ok "$api API enabled" \
