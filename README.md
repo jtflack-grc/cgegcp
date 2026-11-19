@@ -30,6 +30,38 @@ What the Terraform builds, resource by resource:
 
 More diagrams (identities, daily loop, remediation ladder, CI gate, data model) are in [`docs/diagrams/`](docs/diagrams/README.md).
 
+## CGE-GCP capstone workspace (jtflack-grc)
+
+**Target GCP Project ID:** `cge-gcp-lab` (separate from MMC). The project name and ID have been confirmed by the project owner; cloud access, billing and deployed resources still need to be verified from the GCP account.
+
+**Development branch:** `cge-gcp-capstone`. Changes live here until they are tested and merged to `main` for final grading. Do not submit the upstream starter without substantial original changes.
+
+### First session: configure your own Cloud SDK session
+
+Run in **Google Cloud Shell** after selecting the intended personal Google account, or in a local terminal with `gcloud`, Terraform and Git available:
+
+```bash
+git clone --branch cge-gcp-capstone https://github.com/jtflack-grc/cgegcp.git
+cd cgegcp
+
+# The actual project ID, not just its console display name:
+gcloud config set project cge-gcp-lab
+gcloud config list
+gcloud projects describe cge-gcp-lab --format='table(projectId,name,projectNumber,parent.type)'
+gcloud billing projects describe cge-gcp-lab --format='value(billingEnabled)'
+
+# Only necessary if ADC is not yet configured for this terminal:
+gcloud auth application-default print-access-token >/dev/null 2>&1 || gcloud auth application-default login
+
+./labs/00-setup/probe.sh
+```
+
+Before deployment: establish a **$25 budget** for this project with **50%, 90%, 100%** notifications. Budget alerts **do not stop spending**. Check that the project belongs to the intended personal account and is not attached to an Organization.
+
+Once the probe is green, follow `labs/02-toolkit/README.md` and `labs/03-foundation/README.md` to deploy incrementally. Stage 3 contains an **irreversible bucket retention lock** (default one-day retention); inspect the Terraform plan and retention period before applying it.
+
+**The first run is intentionally limited to validation and API enablement.** It does not apply Terraform, create a retention lock, or configure IAM federation. See `docs/CAPSTONE-PLAN.md` for the grading checklist and evidence to save.
+
 ## Start here
 
 1. `docs/SETUP.md` (account, budget, logins), then the labs in order: `labs/01-sandbox` to `labs/06-loop`.
