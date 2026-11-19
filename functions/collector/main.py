@@ -56,6 +56,7 @@ def run_checks():
     project = f"//cloudresourcemanager.googleapis.com/projects/{PROJECT}"
     return (checks.chk_stg_01(buckets, bucket_policies)
             + checks.chk_stg_02(buckets)
+            + checks.chk_stg_03(buckets)
             + checks.chk_iam_01(project, proj_policy.get("bindings", []))
             + checks.chk_iam_02(project, keys)
             + checks.chk_log_01(project, proj_policy.get("auditConfigs", [])))
