@@ -8,9 +8,12 @@ Every check, gate rule and pipeline design choice, mapped to NIST CSF 2.0 and NI
 |---|---|---|---|---|
 | `CHK-STG-01` | No bucket binding grants `allUsers` / `allAuthenticatedUsers` | PR.AA-05, PR.DS-01 | AC-3, AC-6, SC-7 | Stage 6 remediator |
 | `CHK-STG-02` | Uniform bucket-level access is on | PR.AA-05 | AC-3, AC-6 | Stage 6 (kept on during every fix) |
+| `CHK-STG-03` | **Custom control:** public access prevention is explicitly `enforced` on every bucket (missing or `inherited` fails) | PR.DS-01, PR.AA-05 | AC-3, SC-7 | Manual IaC correction; gate blocks new unsafe bucket defaults |
 | `CHK-IAM-01` | No service account holds Owner, Editor or Viewer on the project | PR.AA-05 | AC-6 | Manual (Lab 4) |
 | `CHK-IAM-02` | No user-managed service account keys | PR.AA-01 | IA-5 | Manual; gate blocks new ones |
 | `CHK-LOG-01` | Data Access logs (read + write) on for Cloud Storage | PR.PS-04 | AU-2, AU-12 | Stage 2 activation |
+
+The additional `CHK-STG-03` is independent of `CHK-STG-01`: a bucket can have no current public IAM members and still lack an explicit guardrail against future public grants. Evidence is the Cloud Asset Inventory bucket resource's `iamConfiguration.publicAccessPrevention`; missing data fails closed. Positive, negative, and missing-property fixtures are verified in `functions/collector/test_custom_controls.py`. This is a detective control; the Terraform gate separately prevents introducing a noncompliant bucket.
 
 In a stored check result, the control mappings the video calls "Controls" are two fields: `csf` and `sp800_53`.
 
