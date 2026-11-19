@@ -10,6 +10,8 @@ command -v gcloud >/dev/null || { echo "gcloud is required (use Google Cloud She
 
 echo "== Confirm project =="
 gcloud config set project "$PROJECT" >/dev/null
+# Ensure Cloud Resource Manager API is enabled before project ancestry checks.
+gcloud services enable cloudresourcemanager.googleapis.com --project="$PROJECT" --quiet >/dev/null
 ACTUAL_ID="$(gcloud projects describe "$PROJECT" --format='value(projectId)')"
 [ "$ACTUAL_ID" = "$PROJECT" ] || { echo "Unexpected project ID: $ACTUAL_ID"; exit 1; }
 gcloud projects describe "$PROJECT" --format='table(projectId,name,projectNumber,parent.type)'
@@ -17,7 +19,7 @@ ACTIVE_ACCOUNT="$(gcloud auth list --filter='status:ACTIVE' --format='value(acco
 echo "Active account: $ACTIVE_ACCOUNT"
 [ -n "$ACTIVE_ACCOUNT" ] || { echo "No active gcloud identity"; exit 1; }
 
-PARENT_JSON="$(timeout 25s gcloud projects describe "$PROJECT" --format='json(parent)')" || {
+PARENT_JSON="$(timeout 60s gcloud --quiet projects describe "$PROJECT" --format='json(parent)')" || {
   echo "STOP: project ancestry lookup failed or timed out."
   exit 1
 }
