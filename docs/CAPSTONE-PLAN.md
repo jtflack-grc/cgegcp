@@ -1,8 +1,8 @@
 # CGE-GCP capstone execution plan
 
-**Status:** planning only; no GCP infrastructure deployed.
+**Status:** GitHub engineering underway, GCP deployment not yet verified. `cge-gcp-lab` is the confirmed target Project ID; billing, tenancy and API readiness require live verification.
 
-**Target tenancy:** Dedicated personal-Gmail Google Cloud project, no Organization parent. Keep all resources separate from MMC. Confirm actual project ID before deployment; never commit secrets, credential files, personal details, or live project credentials.
+**Target tenancy:** Dedicated personal-Gmail Google Cloud project, no Organization parent. Keep all resources separate from MMC. Confirmed project ID: `cge-gcp-lab`; verify active gcloud project and billing before deployment; never commit secrets, credential files, personal details, or live project credentials.
 
 **Scoring goal:** 100/100 on five equally weighted capstone dimensions. The [Academy rubric](https://cert.grcengclub.com/rubric/cge-gcp) takes precedence over the repository copy when they differ.
 
@@ -14,7 +14,7 @@
 4. Deploy Stage 2 only for observed gaps; retain Terraform ownership of resources it created.
 5. Deploy Stage 3 evidence store and daily collector promptly, so natural run history accumulates.
 6. Deploy Stage 4 reports from Firestore, with evidence provenance and a locked WORM bucket.
-7. Implement and test an **original sixth detective control**, with passing/failing fixtures, collector mappings, and matching `docs/CONTROLS.md`. Candidate: flag bucket configurations that fail `public_access_prevention = "enforced"`; verify its exact scope against the five starter checks before deciding.
+7. Implement and test an **original sixth detective control**, with passing/failing fixtures, collector mappings, and matching `docs/CONTROLS.md`. **Implemented in the development branch:** `CHK-STG-03` checks explicit public access prevention on every bucket, independent of the existing public-IAM and uniform-access checks. Positive/negative/missing-property tests are in `functions/collector/test_custom_controls.py`. Cloud validation pending.
 8. Deploy Stage 6 remediator initially as `report_only`; document limited role and blast radius. Never activate automatic correction without a reviewed decision.
 9. Arm gate and drift workflows against this fork using keyless federation; prove a noncompliant test PR is blocked and then close it.
 10. Capture WORM failed-delete evidence, reporter denied-access evidence, scheduled collection history, and at least two reports generated only from Firestore.
