@@ -15,7 +15,13 @@ echo "Project: ${P:-<none>}   Account: ${ACCT:-<none>}"
 [ -n "$P" ] || { bad "no project pinned: gcloud config set project <YOUR_PROJECT_ID>"; exit 1; }
 export CLOUDSDK_BILLING_QUOTA_PROJECT="$P"
 
-parent=$(gcloud projects describe "$P" --format='value(parent.type)' 2>/dev/null)
+# Use the same simple JSON project lookup as the manual diagnostic.
+# A formatted nested value lookup can intermittently hang on some Cloud Shell sessions.
+PARENT_JSON=$(timeout 25s gcloud projects describe "$P" --format='json(parent)') || {
+  bad "project parent lookup failed or timed out; verify with: gcloud projects describe $P --format=json"
+  exit 1
+}
+parent=$(printf '%s' "$PARENT_JSON" | python3 -c 'import json,sys; p=json.load(sys.stdin).get("parent") or {}; print(p.get("type", ""))')
 [ -z "$parent" ] && ok "no Organization above the project (course tenancy)" \
   || echo "  ! project sits under an $parent: fine, but read 'If you have an Organization' in docs/SETUP.md"
 
