@@ -15,9 +15,19 @@ echo "Project: ${P:-<none>}   Account: ${ACCT:-<none>}"
 [ -n "$P" ] || { bad "no project pinned: gcloud config set project <YOUR_PROJECT_ID>"; exit 1; }
 export CLOUDSDK_BILLING_QUOTA_PROJECT="$P"
 
+# New projects do not necessarily have Resource Manager enabled. Enable APIs
+# before calling projects describe, and suppress interactive auto-enable prompts.
+echo "Enabling prerequisite APIs (first run may take a moment)..."
+if ! gcloud services enable cloudresourcemanager.googleapis.com cloudasset.googleapis.com \\
+  logging.googleapis.com storage.googleapis.com cloudbilling.googleapis.com \\
+  --project="$P" --quiet; then
+  bad "could not enable prerequisite APIs (check project owner and billing)"
+  exit 1
+fi
+
 # Use the same simple JSON project lookup as the manual diagnostic.
 # A formatted nested value lookup can intermittently hang on some Cloud Shell sessions.
-PARENT_JSON=$(timeout 25s gcloud projects describe "$P" --format='json(parent)') || {
+PARENT_JSON=$(timeout 60s gcloud --quiet projects describe "$P" --format='json(parent)') || {
   bad "project parent lookup failed or timed out; verify with: gcloud projects describe $P --format=json"
   exit 1
 }
