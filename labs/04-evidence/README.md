@@ -88,7 +88,7 @@ The function builds as `grc-builder`, which holds only `roles/cloudbuild.builds.
 .venv/bin/python labs/04-evidence/seed_frameworks.py YOUR_PROJECT_ID
 ```
 
-**Expected:** `Seeded 4 frameworks and 5 mappings into YOUR_PROJECT_ID`
+**Expected:** `Seeded 4 frameworks and 6 mappings into YOUR_PROJECT_ID`
 
 ### 5. Collect now
 
