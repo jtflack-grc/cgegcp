@@ -34,6 +34,12 @@ jobs:
           drifted=""
           for d in stages/*/; do
             s=$(basename "$d")
+            # Stage 5 is optional. An undeployed stage has no state and therefore
+            # no baseline to drift from. Plan it only after its first apply.
+            if [ "$s" = "05-narrative" ] && ! gcloud storage ls "gs://${CLOUDSDK_CORE_PROJECT}-tfstate/05-narrative/default.tfstate" >/dev/null 2>&1; then
+              echo "Skipping optional undeployed stage: $s"
+              continue
+            fi
             printf 'project_id   = "%s"\nstate_bucket = "%s-tfstate"\n' "$CLOUDSDK_CORE_PROJECT" "$CLOUDSDK_CORE_PROJECT" > "$d/project.auto.tfvars"
             (cd "$d" && terraform init -input=false -backend-config="bucket=${CLOUDSDK_CORE_PROJECT}-tfstate" >/dev/null)
             set +e
